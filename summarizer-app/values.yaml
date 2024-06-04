@@ -1,0 +1,27 @@
+frontend:
+  image: pratham1443/react-frontend:latest
+  service:
+    type: LoadBalancer
+    port: 3000
+
+javaspringboot:
+  image: pratham1443/java-springboot-service:latest
+  service:
+    type: ClusterIP
+    port: 8080
+
+pythonfastapi:
+  image: pratham1443/python-fastapi-service:latest
+  service:
+    type: ClusterIP
+    port: 8000
+
+postgres:
+  image: postgres:latest
+  database: my-postgresql
+  username: postgres
+  password: duxWygN3Sc
+  service:
+    type: ClusterIP
+    port: 5432
+
