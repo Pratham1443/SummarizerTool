@@ -40,6 +40,9 @@ dependencies {
 	implementation 'com.typesafe:config:1.4.1'
 	implementation 'org.scalaj:scalaj-http_2.13:2.4.2'
 	testImplementation 'org.scalatest:scalatest_2.13:3.2.9'
+	implementation 'io.circe:circe-core_2.13:0.14.1'
+	implementation 'io.circe:circe-generic_2.13:0.14.1'
+	implementation 'io.circe:circe-parser_2.13:0.14.1'
 }
 
 tasks.named('test') {

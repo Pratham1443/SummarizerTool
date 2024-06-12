@@ -44,6 +44,8 @@ dependencies {
 
     // Add HTTP client library for making requests
     implementation 'org.scalaj:scalaj-http_2.13:2.4.2'
+    implementation 'io.circe:circe-core_2.13:0.14.1'
+    implementation 'io.circe:circe-generic_2.13:0.14.1'
 }
 
 // Apply a specific Java toolchain to ease working on different environments.

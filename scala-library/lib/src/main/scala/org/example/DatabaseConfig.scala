@@ -6,6 +6,12 @@ import scalaj.http._
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import org.slf4j.LoggerFactory
+import io.circe.syntax._
+import io.circe.generic.auto._
+import io.circe.Json
+import io.circe._
+
+case class LogEntry(id: Int, url: String, summary: String)
 
 object DatabaseConfig {
   val db = Database.forConfig("mydb", ConfigFactory.load())
@@ -49,9 +55,44 @@ object DatabaseConfig {
     }
   }
 
-  def getHistory(): Seq[(String, String)] = {
+//  def getHistory(): Seq[(String, String, String)] = {
+//    // Retrieve history from the database
+//    val query = requestLogs.map(log => (log.id.toString(), log.url, log.summary)).result
+//    Await.result(db.run(query), 30.seconds)
+//  }
+
+//  def getHistory(): String = {
+//    // Retrieve history from the database
+//    val query = requestLogs.map(log => (log.id.toString(), log.url, log.summary)).result
+//    val result = Await.result(db.run(query), 30.seconds)
+//
+//    // Convert the sequence of tuples to a sequence of LogEntry objects
+//    val logEntries = result.map { case (id, url, summary) => LogEntry(id, url, summary) }
+//
+//    // Convert the sequence of LogEntry objects to JSON
+//    val json = Json.toJson(logEntries)
+//
+//    // Return the JSON as a string
+//    json.toString()
+//  }
+  def getHistory(): Seq[String] = {
     // Retrieve history from the database
-    val query = requestLogs.map(log => (log.url, log.summary)).result
-    Await.result(db.run(query), 30.seconds)
+    val query = requestLogs.map(log => (log.id, log.url, log.summary)).result
+    val result = Await.result(db.run(query), 30.seconds)
+
+    // Convert the sequence of tuples to a sequence of LogEntry objects
+    val logEntries = result.map { case (id, url, summary) => LogEntry(id, url, summary) }
+
+    // Convert the result to JSON
+    logEntries.map(_.asJson.noSpaces)
+  }
+
+  def updateSummary(id: Int, newSummary: String): Int = {
+    val query = requestLogs.filter(_.id === id)
+      .map(_.summary)
+      .update(newSummary)
+    db.run(query)
+    val done: Int = 1
+    done
   }
 }

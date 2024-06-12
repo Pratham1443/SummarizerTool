@@ -1,15 +1,15 @@
 package com.example.javaspringbootservice;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
 
-import org.example.DatabaseConfig; 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RestController;
+import org.example.DatabaseConfig;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import scala.collection.Seq;
 import scala.collection.JavaConverters;
 import scala.Tuple2;
+import scala.Tuple3;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -17,6 +17,7 @@ import java.util.HashMap;
 
 @RestController
 public class Controller {
+    private ObjectMapper mapper = new ObjectMapper();
     @CrossOrigin(origins = "http://127.0.0.1:3000")
     @PostMapping("/summarize")
     public Map<String, String> summarize(@RequestBody Map<String, String> requestBody) {
@@ -30,16 +31,38 @@ public class Controller {
 
     @CrossOrigin(origins = "http://127.0.0.1:3000")
     @GetMapping("/history")
-    public List<Map<String, String>> getHistory() {
-        Seq<Tuple2<String, String>> scalaSeq = DatabaseConfig.getHistory();
-        List<Map<String, String>> javaList = new ArrayList<>();
-        for (Tuple2<String, String> tuple : JavaConverters.seqAsJavaList(scalaSeq)) {
-            Map<String, String> entry = new HashMap<>();
-            entry.put("url", tuple._1);
-            entry.put("summary", tuple._2);
-            javaList.add(entry);
+    public List<String> getHistory() throws IOException {
+        List<String> jsonStrings = JavaConverters.seqAsJavaListConverter(DatabaseConfig.getHistory()).asJava();
+        System.out.println(jsonStrings);
+//        List<Map<String, String>> result = new ArrayList<>();
+//        System.out.println(jsonStrings);
+//
+//        for (String jsonString : jsonStrings) {
+//            Map<String, String> map = mapper.readValue(jsonString, Map.class);
+//            result.add(map);
+//        }
+
+        return jsonStrings;
+    }
+
+    @CrossOrigin(origins = "http://127.0.0.1:3000")
+    @PutMapping("/history/{id}")
+    public Map<String, String> updateHistory(@PathVariable Integer id, @RequestBody Map<String, String> entry) {
+        // Logic to find the history item by id and update its summary
+        // Save the updated item
+        String summary = entry.get("summary");
+        Integer done = DatabaseConfig.updateSummary(id, summary);
+        Map<String, String> response = new HashMap<>();
+
+        if(done == 1) {
+            System.out.println("Updated!!!!");
+            response.put("data", "Updated successfully");
         }
-        return javaList;
+        else {
+            System.out.println("Failed!!!!");
+            response.put("data", "Update failed");
+        }
+        return response;
     }
 }
 
